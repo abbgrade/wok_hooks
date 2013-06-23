@@ -1,7 +1,7 @@
 wok_hooks
 =========
 
-Some utile hooks for wok, the static website generator.
+Some utile hooks for [wok](https://github.com/mythmon/wok), the static website generator.
 
 ## Distribution
 
