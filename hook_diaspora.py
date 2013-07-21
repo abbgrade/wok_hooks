@@ -47,8 +47,6 @@ class DiasporaNote(TimelineUpdate):
         # fix awful mix of html and markdown
         content = re.sub(r'<.*?>', '', content)
 
-        print content
-
         TimelineUpdate.__init__(self, slug, title, url, time, content)
 
         self.actions.append(('open diaspora', url))
