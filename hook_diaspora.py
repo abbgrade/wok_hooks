@@ -14,6 +14,7 @@ from activitystreams import PostActivity, NoteObject
 from activitystreams.atom import make_activities_from_feed
 import urllib2
 import xml.etree.ElementTree
+import re
 
 import os
 
@@ -32,12 +33,21 @@ class Configuration(_Configuration):
 
 class DiasporaNote(TimelineUpdate):
 
+    TITLE_CHAR_BLACKLIST = ['[', '!']
+
     def __init__(self, base_object, time, pod, user):
         assert isinstance(base_object, NoteObject)
         slug = base_object.id.replace('https://%s/' % pod, pod + '-').replace('/', '-').replace('_', '-').replace('.', '-')
         title = base_object.name
+        for char in DiasporaNote.TITLE_CHAR_BLACKLIST:
+            title = title.replace(char, '')
         url = base_object.url
         content = base_object.content
+
+        # fix awful mix of html and markdown
+        content = re.sub(r'<.*?>', '', content)
+
+        print content
 
         TimelineUpdate.__init__(self, slug, title, url, time, content)
 
