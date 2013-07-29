@@ -49,7 +49,7 @@ class DiasporaNote(TimelineUpdate):
 
         TimelineUpdate.__init__(self, slug, title, url, time, content)
 
-        self.actions.append(('open diaspora', url))
+        self.actions.append(('show diaspora', url))
 
 
 def add_diaspora_posts_to_microblog(content_dir = './content/timeline/'):
