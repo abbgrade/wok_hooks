@@ -33,7 +33,7 @@ class Configuration(_Configuration):
 
 class DiasporaNote(TimelineUpdate):
 
-    TITLE_CHAR_BLACKLIST = ['[', '!']
+    TITLE_CHAR_BLACKLIST = ['[', '!', '*', ':']
 
     def __init__(self, base_object, time, pod, user):
         assert isinstance(base_object, NoteObject)
