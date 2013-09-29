@@ -70,9 +70,9 @@ Remove temp files before generating the website.
 
 Generation of (small) (activity based) posts.
 
-### add_diaspora_posts_to_microblog
+### add_diaspora_posts_to_timeline
 
-Add public diaspora posts to timeline.
+Add public diaspora posts to the timeline.
 
 #### Sample config *diaspora.conf*:
 
@@ -81,12 +81,24 @@ Add public diaspora posts to timeline.
 		"user": "username"
 	}
 
-### add_github_posts_to_microblog
+### add_github_posts_to_timeline
 
-Add public github activities to timeline.
+Add public github activities to the timeline.
 
 #### Sample config *github.com*:
 	
 	{
 		"user": "abbgrade"
+	}
+
+### add_diggs_to_timeline
+
+Add public digg recommendations to the timeline.
+
+Get your id from the digg-setting page on "Privacy/Diggs" and set it to *Public*.
+An url appears, which contains the id between *http://digg.com/user/* and */diggs.rss*.
+Add that string in the *digg.config*
+
+	{
+		"secret_user_id": "#HERE#"
 	}

@@ -18,7 +18,9 @@ class Post(object):
         self.actions = []
 
     def save(self, content_dir):
-        with open('%s%s.md' % (content_dir, self.slug), 'w+') as fd:
+        path = '%s%s.md' % (content_dir, self.slug)
+        logging.debug('save %s' % path)
+        with open(path, 'w+') as fd:
             def writeline(text):
                 try:
                     fd.write(text.encode('utf8') + '\n')

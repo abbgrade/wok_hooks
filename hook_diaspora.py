@@ -5,10 +5,8 @@ Created on 21.06.2013
 '''
 
 import logging
-from misc import Configuration as _Configuration
 
-DEFAULTS = {'pod': '',
-            'user': ''}
+from misc import Configuration as _Configuration
 
 from activitystreams import PostActivity, NoteObject
 from activitystreams.atom import make_activities_from_feed
@@ -19,6 +17,9 @@ import re
 import os
 
 from timeline import Post as TimelineUpdate
+
+DEFAULTS = {'pod': '',
+            'user': ''}
 
 class Configuration(_Configuration):
 
@@ -52,7 +53,7 @@ class DiasporaNote(TimelineUpdate):
         self.actions.append(('show diaspora', url))
 
 
-def add_diaspora_posts_to_microblog(content_dir = './content/timeline/'):
+def add_diaspora_posts_to_timeline(content_dir = './content/timeline/'):
     config = Configuration('diaspora.config')
     url = '%spublic/%s.atom' % ('https://%s/' % (config['pod']), config['user'])
     response = urllib2.urlopen(url)

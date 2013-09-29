@@ -217,7 +217,7 @@ class CreatePost(TimelineUpdate):
         self.actions.append(('show project', url))
 
 
-def add_github_posts_to_microblog(content_dir = './content/timeline/'):
+def add_github_activities_to_timeline(content_dir = './content/timeline/'):
     config = Configuration('github.config')
     url = '%s%s.atom' % ('https://github.com/', config['user'])
     response = urllib2.urlopen(url)
