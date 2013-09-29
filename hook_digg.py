@@ -8,8 +8,6 @@ import logging
 
 from misc import Configuration as _Configuration
 
-import urllib2
-import xml.etree.ElementTree
 import feedparser
 from datetime import datetime
 from timeline import Post as TimelineUpdate
@@ -29,18 +27,11 @@ class Configuration(_Configuration):
 
 class Digg(TimelineUpdate):
 
-    TITLE_CHAR_BLACKLIST = ['[', '!', '*', ':']
-
     def __init__(self, time, title, url):
 
         slug = str(filter(unicode.isalnum, url.replace('http://', ''))).lower()
 
         content = 'recommended [%s](%s)' % (title, url)
-
-        # content = base_object.content
-
-        # fix awful mix of html and markdown
-        # content = re.sub(r'<.*?>', '', content)
 
         TimelineUpdate.__init__(self, slug, title, url, time, content)
 
