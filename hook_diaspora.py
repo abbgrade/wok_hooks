@@ -8,7 +8,7 @@ import logging
 
 from misc import Configuration as _Configuration
 
-from activitystreams import PostActivity, NoteObject
+from activitystreams import Activity as PostActivity, Object as NoteObject
 from activitystreams.atom import make_activities_from_feed
 import urllib2
 import xml.etree.ElementTree
@@ -53,7 +53,7 @@ class DiasporaNote(TimelineUpdate):
         self.actions.append(('show diaspora', url))
 
 
-def add_diaspora_posts_to_timeline(content_dir = './content/timeline/'):
+def add_diaspora_posts_to_timeline(options, content_dir = './content/timeline/'):
     config = Configuration('diaspora.config')
     url = '%spublic/%s.atom' % ('https://%s/' % (config['pod']), config['user'])
     response = urllib2.urlopen(url)
@@ -68,12 +68,12 @@ def add_diaspora_posts_to_timeline(content_dir = './content/timeline/'):
                     note = DiasporaNote(activity.object, activity.time, config['pod'], config['user'])
                     note.save(content_dir)
                 else:
-                    logging.info('unexpected post object')
+                    logging.debug('unexpected post object')
             else:
-                logging.info('unknwon diaspora activity verb %s' % activity.verb)
+                logging.debug('unknwon diaspora activity verb %s' % activity.verb)
         except Exception as ex:
             print ex
 
 if __name__ == '__main__':
     logging.basicConfig(format = '%(asctime)s %(levelname)s %(name)s:%(message)s', level = logging.DEBUG)
-    add_diaspora_posts_to_microblog('/tmp/')
+    add_diaspora_posts_to_timeline({}, '/tmp/')

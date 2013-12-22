@@ -37,7 +37,7 @@ class Digg(TimelineUpdate):
 
         self.actions.append(('show article', url))
 
-def add_diggs_to_timeline(content_dir = './content/timeline/'):
+def add_diggs_to_timeline(options, content_dir = './content/timeline/'):
     config = Configuration('digg.config')
     url = 'http://digg.com/user/%(secret_user_id)s/diggs.rss' % {'secret_user_id': config['secret_user_id']}
 
@@ -47,4 +47,4 @@ def add_diggs_to_timeline(content_dir = './content/timeline/'):
 
 if __name__ == '__main__':
     logging.basicConfig(format = '%(asctime)s %(levelname)s %(name)s:%(message)s', level = logging.DEBUG)
-    add_diggs_to_timeline('/tmp/')
+    add_diggs_to_timeline({}, '/tmp/')

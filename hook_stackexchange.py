@@ -38,12 +38,14 @@ class StackExchangeQuestion(StackExchangeActivity):
 
     def __init__(self, site, user_id, title, creation_date, timeline_type, post_id, slug = None, post_type = None):
         if slug is None:
-            slug = '%s_question_%d' % (site, post_id)
+            slug = '%s-question-%d' % (site, post_id)
 
         url = 'http://api.stackexchange.com/2.1/posts/%d?order=desc&sort=activity&site=%s' % (post_id, site)
-        response = http.request('GET', url)
-        response_struct = json.loads(response.data)
-        url = response_struct['items'][0]['link']
+        try:
+            response = http.request('GET', url)
+            response_struct = json.loads(response.data)
+            url = response_struct['items'][0]['link']
+        except: pass
 
         content = 'asked question on %s [%s](%s)' % (site, title, url)
 
@@ -55,12 +57,14 @@ class StackExchangeAnswer(StackExchangeActivity):
 
     def __init__(self, site, user_id, title, creation_date, timeline_type, post_id, slug = None, post_type = None):
         if slug is None:
-            slug = '%s_answer_%d' % (site, post_id)
+            slug = '%s-answer-%d' % (site, post_id)
 
         url = 'http://api.stackexchange.com/2.1/posts/%d?order=desc&sort=activity&site=%s' % (post_id, site)
-        response = http.request('GET', url)
-        response_struct = json.loads(response.data)
-        url = response_struct['items'][0]['link']
+        try:
+            response = http.request('GET', url)
+            response_struct = json.loads(response.data)
+            url = response_struct['items'][0]['link']
+        except: pass
 
         content = 'answered on %s [%s](%s)' % (site, title, url)
 
@@ -68,7 +72,7 @@ class StackExchangeAnswer(StackExchangeActivity):
 
         self.actions.append(('show answer', url))
 
-def add_stackexchange_questions_to_timeline(content_dir = './content/timeline/'):
+def add_stackexchange_questions_to_timeline(options, content_dir = './content/timeline/'):
     config = Configuration('stackexchange.config')
     for account in config['accounts']:
         url = 'http://api.stackexchange.com/2.1/users/%d/timeline?site=%s' % (account['user_id'], account['site'])
@@ -76,14 +80,17 @@ def add_stackexchange_questions_to_timeline(content_dir = './content/timeline/')
         response = http.request('GET', url)
         response_struct = json.loads(response.data)
 
-        for entry in response_struct['items']:
-            if entry['timeline_type'] == 'asked':
-                StackExchangeQuestion(account['site'], **entry).save(content_dir)
-            elif entry['timeline_type'] == 'answered':
-                StackExchangeAnswer(account['site'], **entry).save(content_dir)
-            else:
-                logging.debug('ingore %s from %s' % (account['site'], entry['timeline_type']))
+        if 'items' in response_struct:
+            for entry in response_struct['items']:
+                if entry['timeline_type'] == 'asked':
+                    StackExchangeQuestion(account['site'], **entry).save(content_dir)
+                elif entry['timeline_type'] == 'answered':
+                    StackExchangeAnswer(account['site'], **entry).save(content_dir)
+                else:
+                    logging.debug('ingore %s from %s' % (account['site'], entry['timeline_type']))
+        else:
+            logging.debug('no activities in %s' % account['site'])
 
 if __name__ == '__main__':
     logging.basicConfig(format = '%(asctime)s %(levelname)s %(name)s:%(message)s', level = logging.DEBUG)
-    add_stackexchange_questions_to_timeline('/tmp/')
+    add_stackexchange_questions_to_timeline({}, '/tmp/')

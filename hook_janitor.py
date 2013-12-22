@@ -5,10 +5,12 @@ Created on 02.03.2013
 '''
 
 import os
+import logging
 
-def clean_temp_files():
-	for root, dirnames, filenames in os.walk('./', topdown = True):
-		for filename in filenames:
-			if filename[-1] == '~':
-				print 'remove ' + root + '/' + filename
-				os.remove(root + '/' + filename)
+
+def clean_temp_files(options):
+    for root, dirnames, filenames in os.walk('./', topdown=True):
+        for filename in filenames:
+            if filename[-1] == '~':
+                logging.info('remove %s/%s', root, filename)
+                os.remove(root + '/' + filename)

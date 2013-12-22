@@ -4,7 +4,7 @@ Created on 02.03.2013
 @author: steffen
 '''
 
-import logging as log
+import logging
 
 import os
 from ftplib import FTP as FTPClient
@@ -50,7 +50,7 @@ class Stateful(Observable):
     def state(self, value):
         if value != self._state:
             self._state = value
-            log.info('%s is now %s' % (self, value))
+            logging.info('%s is now %s' % (self, value))
             self._raise_state_update()
 
     def _raise_state_update(self):
@@ -112,12 +112,12 @@ class FTP(FileBackend):
                 if not option in self.config:
                     self.config[option] = value
                     some_changes = True
-                    log.info('set default ftp config.')
+                    logging.info('set default ftp config.')
         else:
             self.config['type'] = 'ftp'
             self.config.update(FTP.DEFAULT_CONFIG)
             some_changes = True
-            log.info('set default ftp config.')
+            logging.info('set default ftp config.')
         if some_changes:
             self.config.save()
 
@@ -132,7 +132,7 @@ class FTP(FileBackend):
         self.session = FTPClient(self.config['ftp_host'],
                                  self.config['ftp_user'],
                                  self.config['ftp_password'])
-        log.info('FTP Authorization succeed')
+        logging.info('FTP Authorization succeed')
 
     def disconnect(self):
         if self.session:
@@ -192,12 +192,12 @@ class SFTP(FileBackend):
                 if not option in self.config:
                     self.config[option] = value
                     some_changes = True
-                    log.info('set default sftp config.')
+                    logging.info('set default sftp config.')
         else:
             self.config['type'] = 'sftp'
             self.config.update(SFTP.DEFAULT_CONFIG)
             some_changes = True
-            log.info('set default sftp config.')
+            logging.info('set default sftp config.')
         if some_changes:
             self.config.save()
 
@@ -217,7 +217,7 @@ class SFTP(FileBackend):
         self._transport.connect(username = self.config['sftp_user'],
                                 password = self.config['sftp_password'])
         self.session = SFTPClient.from_transport(self._transport)
-        log.info('SFTP Authorization succeed')
+        logging.info('SFTP Authorization succeed')
 
     def disconnect(self):
         self.session.close()
@@ -241,7 +241,7 @@ class SFTP(FileBackend):
                 dir_contents = self.session.listdir()
                 if not dirname in dir_contents:
                     self.session.mkdir(dirname)
-                    log.info('Create remote directory %s' % self.session.getcwd() + '/' + dirname)
+                    logging.info('Create remote directory %s' % self.session.getcwd() + '/' + dirname)
                 self.session.chdir(dirname)
         elif self.state == self.STATE_DISCONNECTED:
             raise self.ConnectionException('SFTP is %s' % self.state)
@@ -254,16 +254,16 @@ class SFTP(FileBackend):
             self.file_create_folder(dirpath)
             try:
                 self.session.putfo(fl = file_handle, remotepath = '/' + path)
-                log.info('Create remote file %s' % '/' + path)
+                logging.info('Create remote file %s' % '/' + path)
             except Exception as ex:
-                log.debug(ex)
+                logging.error(ex)
         elif self.state == self.STATE_DISCONNECTED:
             raise self.ConnectionException('SFTP is %s' % self.state)
         else:
             raise NotImplementedError()
 
 
-def distribute_output(output_path = None):
+def distribute_output(options, output_path = None):
 
     if not output_path:
         from wok.engine import Engine  # @UnresolvedImport
@@ -295,10 +295,11 @@ def distribute_output(output_path = None):
                                            file_handle)
                 except Exception as ex:
                     file_handle.close()
+                    logging.error('on put_file: ' + ex)
                     raise ex
     except Exception as ex:
-        print ex
-        raise ex
+        logging.error(ex)
+        raise
     finally:
         remote_server.disconnect()
 

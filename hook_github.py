@@ -50,6 +50,10 @@ class PushObject(ActivityObject):
         self.branch = None
         self.commits = []
 
+        if base_object.content is None:
+            logging.debug('empty git push %s', self.id)
+            return
+
         soup = BeautifulSoup(base_object.content)
         title_soup = soup.find('div', { 'class' : 'title' })
         for index, segment in enumerate(title_soup.contents):
@@ -60,17 +64,19 @@ class PushObject(ActivityObject):
                 self.repository_url = 'https://github.com/%s/%s' % (self.owner, self.project)
         push_user = title_soup.contents[1].text
         detail_soup = soup.find('div', { 'class' : 'details'})
-        for item in detail_soup.find('ul'):
-            if isinstance(item, Tag):
-                commit = item.find('a')['href']
-                message = item.find('div', {'class': 'message'})
-                if not message:
-                    logging.info('commit without message')
-                elif item.contents[1]['title'] != push_user:
-                    logging.info('ignore foreign commit')
-                else:
-                    message = message.text
-                    self.commits.append(('http://github.com%s' % commit, message))
+        items = detail_soup.find('ul')
+        if items:
+            for item in items:
+                if isinstance(item, Tag):
+                    commit = item.find('a')['href']
+                    message = item.find('div', {'class': 'message'})
+                    if not message:
+                        logging.info('commit without message')
+                    elif item.contents[1]['title'] != push_user:
+                        logging.info('ignore foreign commit')
+                    else:
+                        message = message.text
+                        self.commits.append(('http://github.com%s' % commit, message))
 
 
 class PullRequestObject(ActivityObject):
@@ -217,7 +223,7 @@ class CreatePost(TimelineUpdate):
         self.actions.append(('show project', url))
 
 
-def add_github_activities_to_timeline(content_dir = './content/timeline/'):
+def add_github_activities_to_timeline(options, content_dir = './content/timeline/'):
     config = Configuration('github.config')
     url = '%s%s.atom' % ('https://github.com/', config['user'])
     response = urllib2.urlopen(url)
@@ -251,12 +257,12 @@ def add_github_activities_to_timeline(content_dir = './content/timeline/'):
                 elif activity.object and ATOM_GITHUB_ISSUE_COMMENT.search(activity.object.id):
                     pass  # ingore issues
                 else:
-                    logging.info('unexpected post object')
+                    logging.debug('unexpected post object')
             else:
-                logging.info('unknwon github activity verb %s' % activity.verb)
+                logging.debug('unknwon github activity verb %s' % activity.verb)
         except IOError as ex:
             print ex
 
 if __name__ == '__main__':
     logging.basicConfig(format = '%(asctime)s %(levelname)s %(name)s:%(message)s', level = logging.DEBUG)
-    add_github_posts_to_microblog('/tmp/')
+    add_github_activities_to_timeline({}, '/tmp/')
