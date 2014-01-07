@@ -102,3 +102,11 @@ Add that string in the *digg.config*
 	{
 		"secret_user_id": "#HERE#"
 	}
+
+## VCard
+
+Import of contact data from vcard files.
+
+### add_vcard_to_contact
+
+Read vcard files adds the contact data as metadata in generated markdown files.

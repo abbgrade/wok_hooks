@@ -50,10 +50,6 @@ class PushObject(ActivityObject):
         self.branch = None
         self.commits = []
 
-        if base_object.content is None:
-            logging.debug('empty git push %s', self.id)
-            return
-
         soup = BeautifulSoup(base_object.content)
         title_soup = soup.find('div', { 'class' : 'title' })
         for index, segment in enumerate(title_soup.contents):
@@ -226,14 +222,24 @@ class CreatePost(TimelineUpdate):
 def add_github_activities_to_timeline(options, content_dir = './content/timeline/'):
     config = Configuration('github.config')
     url = '%s%s.atom' % ('https://github.com/', config['user'])
+    #req = urllib2.Request(url, {}, {'Content-Type': 'application/atom+xml'})
     response = urllib2.urlopen(url)
     contents = response.read()
+
+    #import HTMLParser
+    #contents = HTMLParser.HTMLParser().unescape(contents)
+
     xml_tree = xml.etree.ElementTree.fromstring(contents)
     xml_tree.getroot = lambda: xml_tree
     activities = make_activities_from_feed(xml_tree)
     for activity in activities:
         try:
             if isinstance(activity, PostActivity):
+
+                if activity.object.content is None:
+                    logging.debug('empty git activity %s', activity.object)
+                    continue
+
                 if activity.object and ATOM_GITHUB_PUSH.search(activity.object.id):
                     activity = PushActivity(activity)
                     post = PushPost(activity.object, activity.time)

@@ -29,7 +29,11 @@ class Configuration(_Configuration):
 
 email_pattern = re.compile(r'[\w\-]?[<][\w\-\.]+@[\w\-][\w\-\.]+[a-zA-Z]{1,4}?[>]')
 
-def add_mails_to_comments(options, content_dir = './content/comments/'):
+def add_mails_to_comments(options, content_dir=None):
+
+    if content_dir is None:
+        content_dir = './content/comments/'
+
     config = Configuration('comments.config')
 
     connection = imaplib.IMAP4_SSL(config['server'])

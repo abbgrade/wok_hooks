@@ -1,0 +1,81 @@
+'''
+Created on 06.01.2014
+
+@author: steffen
+'''
+
+import logging
+import vobject
+import os
+import json
+import urllib
+from BeautifulSoup import BeautifulSoup
+import gnupg
+
+def add_vcard_to_contact(config):
+    for dirpath, dirnames, filenames in os.walk(config['media_dir']):
+        for filename in filenames:
+            with open(os.path.join(dirpath, filename)) as file_handle:
+                if file_handle.readline().strip() == 'BEGIN:VCARD':
+                    file_handle.seek(0)
+                    v = vobject.readOne(file_handle)
+
+                    name = v.fn.value
+                    email = v.email.value
+                    uris = []
+                    if 'x-uris' in v.contents:
+                        for uri in v.contents['x-uris']:
+                            # get title of link
+                            root_uri = '/'.join(uri.value.split('/')[:3])
+                            web_page_xml = BeautifulSoup(urllib.urlopen(root_uri))
+                            title = web_page_xml.title.string
+                            title_ = ''.join(map(lambda c: c if ord('A') <= ord(c) <= ord('Z') else ' ', title.upper()))
+                            short_title = title[:len(title_.split('  ')[0])].strip()
+                            uris.append((short_title, uri.value))
+
+                    gpg_key = None
+                    gpg_path = os.path.join(dirpath, '.'.join((filename.split('.')[:-1])) + '.asc')
+                    if os.path.exists(gpg_path):
+
+                        gpg = gnupg.GPG()
+                        key_data = open(gpg_path).read()
+                        keyfile = gpg.import_keys(key_data)
+                        fingerprint = keyfile.results[0]['fingerprint']
+
+                        if gpg_path.startswith(os.sep):
+                            gpg_path = gpg_path[len(os.sep):]
+                        if gpg_path.startswith(config['media_dir']):
+                            gpg_path = gpg_path[len(config['media_dir']):]
+                        gpg_key = fingerprint, gpg_path
+
+                    meta_data = []
+                    meta_data.append(('title', name))
+                    meta_data.append(('type', 'contact'))
+                    meta_data.append(('category', 'contact'))
+                    meta_data.append(('name', name))
+                    meta_data.append(('email', email))
+
+                    if gpg_key:
+                        meta_data.append(('gpg', gpg_key))
+
+                    if uris:
+                        meta_data.append(('links', uris))
+
+                    new_filename = filename.split('.')[:-1]
+                    new_filename.append('mkd')
+                    new_filename = '.'.join(new_filename)
+
+                    new_path = os.path.sep.join([config['content_dir'], 'contact', new_filename])
+
+                    with open(new_path, 'wb') as new_file_handle:
+                        for key, value in meta_data:
+                            if not isinstance(value, basestring):
+                                value = json.dumps(value)
+                            new_file_handle.write('%s: %s\n' % (key, value))
+                        new_file_handle.writelines('---\n')
+
+
+
+if __name__ == '__main__':
+    logging.basicConfig(format = '%(asctime)s %(levelname)s %(name)s:%(message)s', level = logging.DEBUG)
+    add_vcard_to_contact({})
