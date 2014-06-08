@@ -8,12 +8,10 @@ import logging
 import vobject
 import os
 import json
-import urllib
-from BeautifulSoup import BeautifulSoup
 import gnupg
 
 def add_vcard_to_contact(config):
-    for dirpath, dirnames, filenames in os.walk(config['media_dir']):
+    for dirpath, _, filenames in os.walk(config['media_dir']):
         for filename in filenames:
             with open(os.path.join(dirpath, filename)) as file_handle:
                 if file_handle.readline().strip() == 'BEGIN:VCARD':
@@ -25,12 +23,7 @@ def add_vcard_to_contact(config):
                     uris = []
                     if 'x-uris' in v.contents:
                         for uri in v.contents['x-uris']:
-                            # get title of link
-                            root_uri = '/'.join(uri.value.split('/')[:3])
-                            web_page_xml = BeautifulSoup(urllib.urlopen(root_uri))
-                            title = web_page_xml.title.string
-                            title_ = ''.join(map(lambda c: c if ord('A') <= ord(c) <= ord('Z') else ' ', title.upper()))
-                            short_title = title[:len(title_.split('  ')[0])].strip()
+                            short_title = uri.value.split('/')[2]
                             uris.append((short_title, uri.value))
 
                     gpg_key = None
