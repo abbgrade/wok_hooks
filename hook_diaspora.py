@@ -12,6 +12,7 @@ from activitystreams import Activity as PostActivity, Object as NoteObject
 from activitystreams.atom import make_activities_from_feed
 import urllib2
 import xml.etree.ElementTree
+import html2text
 import re
 
 import os
@@ -46,7 +47,8 @@ class DiasporaNote(TimelineUpdate):
         content = base_object.content
 
         # fix awful mix of html and markdown
-        content = re.sub(r'<.*?>', '', content)
+        # content = re.sub(r'<.*?>', '', content)
+        content = html2text.html2text(content)
 
         TimelineUpdate.__init__(self, slug, title, url, time, content)
 
