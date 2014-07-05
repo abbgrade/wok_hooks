@@ -103,6 +103,17 @@ Add that string in the *digg.config*
 		"secret_user_id": "#HERE#"
 	}
 
+### add_wikipedia_actions_to_timeline
+
+ Add wikipedia contributions to the timeline.
+
+#### Sample config *wikipedia.conf*:
+
+    {
+        "lang": "de",
+        "user": "username"
+    }
+
 ## VCard
 
 Import of contact data from vcard files.
