@@ -11,6 +11,7 @@ from hook_digg import add_diggs_to_timeline
 from hook_stackexchange import add_stackexchange_questions_to_timeline
 from hook_comments import add_mails_to_comments
 from hook_vcard import add_vcard_to_contact
+from hook_wikipedia import add_wikipedia_actions_to_timeline
 
 # The `hooks` dictionary that wok will import
 hooks = {
@@ -19,6 +20,7 @@ hooks = {
                    add_github_activities_to_timeline,
                    add_diggs_to_timeline,
                    add_stackexchange_questions_to_timeline,
+                   add_wikipedia_actions_to_timeline,
                    add_mails_to_comments],
     'site.content.gather.pre': [add_vcard_to_contact],
     'site.done': [distribute_output],

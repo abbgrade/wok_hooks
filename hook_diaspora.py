@@ -13,7 +13,6 @@ from activitystreams.atom import make_activities_from_feed
 import urllib2
 import xml.etree.ElementTree
 import html2text
-import re
 
 import os
 
