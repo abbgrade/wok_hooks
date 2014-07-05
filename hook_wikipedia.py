@@ -37,6 +37,8 @@ class WikipediaContribution(TimelineUpdate):
 
         TimelineUpdate.__init__(self, slug, title, url, time, content)
 
+        self.actions.append(('show changes', url))
+
 
 def add_wikipedia_actions_to_timeline(options, content_dir = './content/timeline/'):
     config = Configuration('wikipedia.config')
