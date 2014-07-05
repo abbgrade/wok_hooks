@@ -17,7 +17,7 @@ from timeline import Post as TimelineUpdate
 
 class Configuration(_Configuration):
 
-    DEFAULTS = {'accounts':[{'user_id': None, 'site': 'stackoverflow'}]}
+    DEFAULTS = {'accounts': [{'user_id': None, 'site': 'stackoverflow'}]}
 
     def __init__(self, path, **kwargs):
         _Configuration.__init__(self, path, **kwargs)
@@ -75,6 +75,8 @@ class StackExchangeAnswer(StackExchangeActivity):
 def add_stackexchange_questions_to_timeline(options, content_dir = './content/timeline/'):
     config = Configuration('stackexchange.config')
     for account in config['accounts']:
+        assert account['user_id'], 'user_id must be set in stackexchange.config'
+        assert account['site'], 'site must be set in stackexchange.config'
         url = 'http://api.stackexchange.com/2.1/users/%d/timeline?site=%s' % (account['user_id'], account['site'])
 
         response = http.request('GET', url)
@@ -93,4 +95,6 @@ def add_stackexchange_questions_to_timeline(options, content_dir = './content/ti
 
 if __name__ == '__main__':
     logging.basicConfig(format = '%(asctime)s %(levelname)s %(name)s:%(message)s', level = logging.DEBUG)
+    import os
+    os.chdir('..')
     add_stackexchange_questions_to_timeline({}, '/tmp/')

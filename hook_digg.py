@@ -47,4 +47,6 @@ def add_diggs_to_timeline(options, content_dir = './content/timeline/'):
 
 if __name__ == '__main__':
     logging.basicConfig(format = '%(asctime)s %(levelname)s %(name)s:%(message)s', level = logging.DEBUG)
+    import os
+    os.chdir('..')
     add_diggs_to_timeline({}, '/tmp/')

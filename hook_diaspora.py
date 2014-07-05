@@ -19,15 +19,15 @@ import os
 
 from timeline import Post as TimelineUpdate
 
-DEFAULTS = {'pod': '',
-            'user': ''}
-
 class Configuration(_Configuration):
+
+    DEFAULTS = {'pod': '',
+                'user': ''}
 
     def __init__(self, path, **kwargs):
         _Configuration.__init__(self, path, **kwargs)
 
-        for key, value in DEFAULTS.items():
+        for key, value in Configuration.DEFAULTS.items():
             if key not in self:
                 self[key] = value
                 self.save()
@@ -57,7 +57,10 @@ class DiasporaNote(TimelineUpdate):
 
 def add_diaspora_posts_to_timeline(options, content_dir = './content/timeline/'):
     config = Configuration('diaspora.config')
+    assert config['pod'], 'pod must be set in diaspora.config'
     url = '%spublic/%s.atom' % ('https://%s/' % (config['pod']), config['user'])
+
+    logging.info('read %s', url)
     response = urllib2.urlopen(url)
     contents = response.read()
     xml_tree = xml.etree.ElementTree.fromstring(contents)
@@ -78,4 +81,5 @@ def add_diaspora_posts_to_timeline(options, content_dir = './content/timeline/')
 
 if __name__ == '__main__':
     logging.basicConfig(format = '%(asctime)s %(levelname)s %(name)s:%(message)s', level = logging.DEBUG)
+    os.chdir('..')
     add_diaspora_posts_to_timeline({}, '/tmp/')

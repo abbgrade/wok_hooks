@@ -221,8 +221,11 @@ class CreatePost(TimelineUpdate):
 
 def add_github_activities_to_timeline(options, content_dir = './content/timeline/'):
     config = Configuration('github.config')
+    assert config['user'], 'user must be set in github.config'
     url = '%s%s.atom' % ('https://github.com/', config['user'])
     #req = urllib2.Request(url, {}, {'Content-Type': 'application/atom+xml'})
+
+    logging.info('read %s', url)
     response = urllib2.urlopen(url)
     contents = response.read()
 
@@ -271,4 +274,6 @@ def add_github_activities_to_timeline(options, content_dir = './content/timeline
 
 if __name__ == '__main__':
     logging.basicConfig(format = '%(asctime)s %(levelname)s %(name)s:%(message)s', level = logging.DEBUG)
+    import os
+    os.chdir('..')
     add_github_activities_to_timeline({}, '/tmp/')
