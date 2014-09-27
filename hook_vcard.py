@@ -55,7 +55,7 @@ def add_vcard_to_contact(config):
                         meta_data.append(('links', uris))
 
                     new_filename = filename.split('.')[:-1]
-                    new_filename.append('mkd')
+                    new_filename.append('md')
                     new_filename = '.'.join(new_filename)
 
                     new_path = os.path.sep.join([config['content_dir'], 'contact', new_filename])
