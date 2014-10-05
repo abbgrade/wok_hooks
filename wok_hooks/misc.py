@@ -1,8 +1,3 @@
-'''
-Created on 21.06.2013
-
-@author: steffen
-'''
 
 import logging as log
 import json
@@ -19,7 +14,7 @@ class Configuration(dict):
     def load(self):
         try:
             with open(self.path, 'rb') as file_handler:
-                self.update(json.loads(file_handler.read()))
+                self.update(json.loads(file_handler.read().decode('utf-8')))
                 file_handler.close()
         except IOError:
             log.debug('No such configuration file: %s' % self.path)

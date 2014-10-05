@@ -1,8 +1,3 @@
-'''
-Created on 02.03.2013
-
-@author: steffen
-'''
 
 import os
 import logging

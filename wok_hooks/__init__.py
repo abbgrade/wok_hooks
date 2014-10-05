@@ -1,1 +1,1 @@
-__author__ = 'abb'
+version = u'0.0.1'

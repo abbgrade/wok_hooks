@@ -1,8 +1,3 @@
-'''
-Created on 06.01.2014
-
-@author: steffen
-'''
 
 import logging
 import vobject
@@ -13,7 +8,7 @@ import gnupg
 def add_vcard_to_contact(config):
     for dirpath, _, filenames in os.walk(config['media_dir']):
         for filename in filenames:
-            with open(os.path.join(dirpath, filename)) as file_handle:
+            with open(os.path.join(dirpath, filename), 'rb') as file_handle:
                 if file_handle.readline().strip() == 'BEGIN:VCARD':
                     file_handle.seek(0)
                     v = vobject.readOne(file_handle)

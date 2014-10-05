@@ -1,11 +1,6 @@
-'''
-Created on 21.06.2013
-
-@author: steffen
-'''
 
 import logging
-from misc import Configuration as _Configuration
+from wok_hooks.misc import Configuration as _Configuration
 
 DEFAULTS = {'user': ''}
 
@@ -14,8 +9,8 @@ from activitystreams.atom import make_activities_from_feed
 import urllib2
 import xml.etree.ElementTree
 import re
-from BeautifulSoup import BeautifulSoup, NavigableString, Tag
-from timeline import Post as TimelineUpdate
+from bs4 import BeautifulSoup, NavigableString, Tag
+from wok_hooks.timeline import Post as TimelineUpdate
 
 GITHUB_PREFIX = "{http://github.dummy/activitystream/}"
 GITHUB_PUSH = GITHUB_PREFIX + 'push'
@@ -71,7 +66,7 @@ class PushObject(ActivityObject):
                     elif item.contents[1]['title'] != push_user:
                         logging.info('ignore foreign commit')
                     else:
-                        message = message.text
+                        message = message.text.strip()
                         self.commits.append(('http://github.com%s' % commit, message))
 
 
@@ -118,11 +113,16 @@ class CreateObject(ActivityObject):
         for index, segment in enumerate(title_soup.contents):
             if isinstance(segment, NavigableString) and segment.strip() == 'branch':
                 self.owner, self.project = title_soup.contents[index + 3].text.split('/')
+                self.branch_name = title_soup.contents[index + 1].text
+                self.object_url = 'https://github.com%s' % title_soup.contents[index + 1]['href']
                 self.repository_url = 'https://github.com/%s/%s' % (self.owner, self.project)
+                self.project = '/'.join([self.project, self.branch_name])
+                self.object_type = segment.strip()
             if isinstance(segment, NavigableString) and segment.strip() == 'repository':
-                self.owner = title_soup.contents[1].text
-                self.project = title_soup.contents[index + 1].text
-                self.repository_url = 'https://github.com/%s/%s' % (self.owner, self.project)
+                self.owner, self.project = title_soup.contents[index + 1]['title'].split('/')
+                self.object_url = 'https://github.com%s' % title_soup.contents[index + 1]['href']
+                self.repository_url = self.object_url
+                self.object_type = segment.strip()
 
 
 class PushActivity(Activity):
@@ -212,11 +212,12 @@ class CreatePost(TimelineUpdate):
         slug = github_id_to_wok_slug(base_object)
         title = 'created %s' % base_object.project
         url = base_object.url
-        content = 'created [%s](%s)' % (base_object.project, base_object.repository_url)
+        content = 'created [%s](%s) %s' % (base_object.project, base_object.object_url, base_object.object_type)
+        content = content.strip()
 
         TimelineUpdate.__init__(self, slug, title, url, time, content)
 
-        self.actions.append(('show project', url))
+        self.actions.append(('show project', base_object.repository_url))
 
 
 def add_github_activities_to_timeline(options, content_dir = './content/timeline/'):
@@ -274,6 +275,6 @@ def add_github_activities_to_timeline(options, content_dir = './content/timeline
 
 if __name__ == '__main__':
     logging.basicConfig(format = '%(asctime)s %(levelname)s %(name)s:%(message)s', level = logging.DEBUG)
-    import os
-    os.chdir('..')
+    #import os
+    #os.chdir('..')
     add_github_activities_to_timeline({}, '/tmp/')

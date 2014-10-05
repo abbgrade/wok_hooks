@@ -1,16 +1,11 @@
-'''
-Created on 05.07.2014
-
-@author: steffen
-'''
 
 import logging
 
-from misc import Configuration as _Configuration
+from wok_hooks.misc import Configuration as _Configuration
 
 import feedparser
 import datetime
-from timeline import Post as TimelineUpdate
+from wok_hooks.timeline import Post as TimelineUpdate
 
 
 class Configuration(_Configuration):

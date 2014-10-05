@@ -1,11 +1,6 @@
-'''
-Created on 29.07.2013
-
-@author: steffen
-'''
 
 import logging
-import json
+
 
 class Post(object):
 

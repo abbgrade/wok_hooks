@@ -1,8 +1,3 @@
-'''
-Created on 02.03.2013
-
-@author: steffen
-'''
 
 import logging
 
@@ -13,7 +8,7 @@ from paramiko import SFTPClient, Transport as SFTPTransport
 ALLOWED_BACKEND_TYPES = ['ftp', 'sftp']
 DEFAULT_BACKEND_TYPE = 'ftp'
 
-from misc import Configuration as _Configuration
+from wok_hooks.misc import Configuration as _Configuration
 
 class Configuration(_Configuration):
 
@@ -288,7 +283,7 @@ def distribute_output(options, output_path = None):
         for root, dirnames, filenames in os.walk(output_path, topdown = True):
             for filename in filenames:
                 path = os.path.sep.join([root, filename])
-                file_handle = open(path, 'r')
+                file_handle = open(path, 'rb')
                 try:
                     remote_server.put_file(path.replace(output_path,
                                                         remote_server.config['output_path']),

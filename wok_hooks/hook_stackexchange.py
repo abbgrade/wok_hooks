@@ -1,19 +1,14 @@
-'''
-Created on 29.09.2013
-
-@author: steffen
-'''
 
 import logging
 
-from misc import Configuration as _Configuration
+from wok_hooks.misc import Configuration as _Configuration
 
 import urllib3
 http = urllib3.PoolManager()
 
 from datetime import datetime
 import json
-from timeline import Post as TimelineUpdate
+from wok_hooks.timeline import Post as TimelineUpdate
 
 class Configuration(_Configuration):
 

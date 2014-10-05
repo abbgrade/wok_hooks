@@ -1,12 +1,6 @@
-'''
-Created on 29.07.2013
 
-@author: steffen
-'''
-
-import logging
-from misc import Configuration as _Configuration
-from comments import Post as Comment
+from wok_hooks.misc import Configuration as _Configuration
+from wok_hooks.comments import Post as Comment
 import imaplib
 import email
 import time
