@@ -51,7 +51,7 @@ So an simple mailto-link and an for-loop for the comments in the page HTML will 
         {% endfor %}
 
         <div>
-            <a class="btn btn-primary" href="mailto:YOUR_CONTACT_EMAIL@EXAMPLE.TLD?subject={{ page.category[0]|safe }}%2F{{ page.slug|safe }}">
+            <a href="mailto:YOUR_CONTACT_EMAIL@EXAMPLE.TLD?subject={{ page.category[0]|safe }}%2F{{ page.slug|safe }}">
                 Add Comment
             </a>
         </div>
