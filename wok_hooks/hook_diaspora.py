@@ -1,11 +1,10 @@
-
 import logging
 
 from wok_hooks.misc import Configuration as _Configuration
 
 from activitystreams import Activity as PostActivity, Object as NoteObject
 from activitystreams.atom import make_activities_from_feed
-import urllib, urllib2
+import urllib2
 import xml.etree.ElementTree
 import html2text
 
@@ -13,8 +12,8 @@ import os
 
 from wok_hooks.timeline import Post as TimelineUpdate
 
-class Configuration(_Configuration):
 
+class Configuration(_Configuration):
     DEFAULTS = {'pod': '',
                 'user': ''}
 
@@ -28,10 +27,9 @@ class Configuration(_Configuration):
 
 
 class DiasporaNote(TimelineUpdate):
-
     TITLE_CHAR_BLACKLIST = ['[', '!', '*', ':']
 
-    def __init__(self, base_object, time, pod, user):
+    def __init__(self, base_object, time, pod):
         assert isinstance(base_object, NoteObject)
         slug = base_object.id.replace('https://%s/' % pod, pod + '-').replace('/', '-').replace('_', '-').replace('.', '-')
         title = base_object.name
@@ -49,7 +47,7 @@ class DiasporaNote(TimelineUpdate):
         self.actions.append(('show diaspora', url))
 
 
-def add_diaspora_posts_to_timeline(options, content_dir = './content/timeline/'):
+def add_diaspora_posts_to_timeline(options, content_dir='./content/timeline/'):
     config = Configuration('diaspora.config')
     assert config['pod'], 'pod must be set in diaspora.config'
     url = '%spublic/%s.atom' % ('https://%s/' % (config['pod']), config['user'])
@@ -65,7 +63,7 @@ def add_diaspora_posts_to_timeline(options, content_dir = './content/timeline/')
             try:
                 if isinstance(activity, PostActivity):
                     if isinstance(activity.object, NoteObject):
-                        note = DiasporaNote(activity.object, activity.time, config['pod'], config['user'])
+                        note = DiasporaNote(activity.object, activity.time, config['pod'])
                         note.save(content_dir)
                     else:
                         logging.debug('unexpected post object')
@@ -73,11 +71,11 @@ def add_diaspora_posts_to_timeline(options, content_dir = './content/timeline/')
                     logging.debug('unknwon diaspora activity verb %s' % activity.verb)
             except Exception as ex:
                 print ex
-    except urllib.error.HTTPError as ex:
+    except urllib2.HTTPError as ex:
         logging.info(ex)
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format = '%(asctime)s %(levelname)s %(name)s:%(message)s', level = logging.DEBUG)
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s:%(message)s', level=logging.DEBUG)
     os.chdir('..')
     add_diaspora_posts_to_timeline({}, '/tmp/')

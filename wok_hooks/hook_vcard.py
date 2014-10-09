@@ -1,9 +1,9 @@
-
 import logging
 import vobject
 import os
 import json
 import gnupg
+
 
 def add_vcard_to_contact(config):
     for dirpath, _, filenames in os.walk(config['media_dir']):
@@ -36,12 +36,13 @@ def add_vcard_to_contact(config):
                             gpg_path = gpg_path[len(config['media_dir']):]
                         gpg_key = fingerprint, gpg_path
 
-                    meta_data = []
-                    meta_data.append(('title', name))
-                    meta_data.append(('type', 'contact'))
-                    meta_data.append(('category', 'contact'))
-                    meta_data.append(('name', name))
-                    meta_data.append(('email', email))
+                    meta_data = [
+                        ('title', name),
+                        ('type', 'contact'),
+                        ('category', 'contact'),
+                        ('name', name),
+                        ('email', email)
+                    ]
 
                     if gpg_key:
                         meta_data.append(('gpg', gpg_key))
@@ -63,7 +64,6 @@ def add_vcard_to_contact(config):
                         new_file_handle.writelines('---\n')
 
 
-
 if __name__ == '__main__':
-    logging.basicConfig(format = '%(asctime)s %(levelname)s %(name)s:%(message)s', level = logging.DEBUG)
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s:%(message)s', level=logging.DEBUG)
     add_vcard_to_contact({})

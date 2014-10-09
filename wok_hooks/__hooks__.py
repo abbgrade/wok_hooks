@@ -1,7 +1,7 @@
-''' __hooks__.py
+""" __hooks__.py
 
 Attach Python functions to wok hooks.
-'''
+"""
 
 from wok_hooks.hook_janitor import clean_temp_files
 from wok_hooks.hook_distribute import distribute_output

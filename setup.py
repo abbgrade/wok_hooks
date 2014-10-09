@@ -26,6 +26,8 @@ setup(
         'Programming Language :: Python',
     ],
     install_requires=[
+        'urllib3',
+        'wok',
         'activitystreams',
         'paramiko',
         'html2text',

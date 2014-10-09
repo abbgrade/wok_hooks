@@ -1,6 +1,6 @@
 # wok_hooks
 
-Some utile hooks for [wok](https://github.com/mythmon/wok), the static website generator.
+Some useful hooks for [wok](https://github.com/mythmon/wok), the static website generator.
 
 Features are a comment system, auto upload and a timeline based on external sources like github or diaspora.
 
@@ -23,13 +23,13 @@ Upload the website output via ftp or ssh/sftp.
 
 ## Comments
 
-The comment system is based on wok subpages, so it will work for blogposts but not for the blog itself.
+The comment system is based on wok sub pages, so it will work for blog posts but not for the blog itself.
 
 ### add_mails_to_comments
 
 Loads comments from IMAP.
 The referenced page is defined by the page slug as mail subject.
-So an simple mailto-link and an for-loop for the comments in the page HTML will be neccessary to have comments in the page.
+So an simple mailto link and an for-loop for the comments in the page HTML will be necessary to have comments in the page.
 
 #### Example Config
 

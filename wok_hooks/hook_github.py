@@ -1,10 +1,9 @@
-
 import logging
 from wok_hooks.misc import Configuration as _Configuration
 
 DEFAULTS = {'user': ''}
 
-from activitystreams import Activity, PostActivity, Object as ActivityObject, NoteObject
+from activitystreams import Activity, PostActivity, Object as ActivityObject
 from activitystreams.atom import make_activities_from_feed
 import urllib2
 import xml.etree.ElementTree
@@ -25,8 +24,8 @@ ATOM_GITHUB_WATCH = re.compile('tag:github.com,2008:WatchEvent/')
 ATOM_GITHUB_ISSUES = re.compile('tag:github.com,2008:IssuesEvent/')
 ATOM_GITHUB_ISSUE_COMMENT = re.compile('tag:github.com,2008:IssueCommentEvent/')
 
-class Configuration(_Configuration):
 
+class Configuration(_Configuration):
     def __init__(self, path, **kwargs):
         _Configuration.__init__(self, path, **kwargs)
 
@@ -37,16 +36,14 @@ class Configuration(_Configuration):
 
 
 class PushObject(ActivityObject):
-
     def __init__(self, base_object):
-        self.id = base_object.id
-        self.url = base_object.url
+        ActivityObject.__init__(self, id=base_object.id, url=base_object.url)
         self.project = None
         self.branch = None
         self.commits = []
 
         soup = BeautifulSoup(base_object.content)
-        title_soup = soup.find('div', { 'class' : 'title' })
+        title_soup = soup.find('div', {'class': 'title'})
         for index, segment in enumerate(title_soup.contents):
             if isinstance(segment, NavigableString) and segment.strip() == 'to':
                 self.branch = title_soup.contents[index + 1].text
@@ -54,7 +51,7 @@ class PushObject(ActivityObject):
                 self.owner, self.project = title_soup.contents[index + 1].text.split('/')
                 self.repository_url = 'https://github.com/%s/%s' % (self.owner, self.project)
         push_user = title_soup.contents[1].text
-        detail_soup = soup.find('div', { 'class' : 'details'})
+        detail_soup = soup.find('div', {'class': 'details'})
         items = detail_soup.find('ul')
         if items:
             for item in items:
@@ -71,14 +68,14 @@ class PushObject(ActivityObject):
 
 
 class PullRequestObject(ActivityObject):
-
     def __init__(self, base_object):
-        self.id = base_object.id
-        self.url = base_object.url
+        ActivityObject.__init__(self,
+                                id=base_object.id,
+                                url=base_object.url)
         self.owner, self.project, self.issue = None, None, None
 
         soup = BeautifulSoup(base_object.content)
-        title_soup = soup.find('div', { 'class' : 'title' })
+        title_soup = soup.find('div', {'class': 'title'})
         for index, segment in enumerate(title_soup.contents):
             if isinstance(segment, NavigableString) and segment.strip() == 'pull request':
                 self.owner, self.project = title_soup.contents[index + 1].text.split('/')
@@ -87,14 +84,12 @@ class PullRequestObject(ActivityObject):
 
 
 class ForkObject(ActivityObject):
-
     def __init__(self, base_object):
-        self.id = base_object.id
-        self.url = base_object.url
+        ActivityObject.__init__(self, id=base_object.id, url=base_object.url)
         self.owner, self.project = None, None
 
         soup = BeautifulSoup(base_object.content)
-        title_soup = soup.find('div', { 'class' : 'title' })
+        title_soup = soup.find('div', {'class': 'title'})
         for index, segment in enumerate(title_soup.contents):
             if isinstance(segment, NavigableString) and segment.strip() == 'to':
                 self.owner, self.project = title_soup.contents[index - 1].text.split('/')
@@ -102,14 +97,12 @@ class ForkObject(ActivityObject):
 
 
 class CreateObject(ActivityObject):
-
     def __init__(self, base_object):
-        self.id = base_object.id
-        self.url = base_object.url
+        ActivityObject.__init__(self, id=base_object.id, url=base_object.url)
         self.owner, self.project = None, None
 
         soup = BeautifulSoup(base_object.content)
-        title_soup = soup.find('div', { 'class' : 'title' })
+        title_soup = soup.find('div', {'class': 'title'})
         for index, segment in enumerate(title_soup.contents):
             if isinstance(segment, NavigableString) and segment.strip() == 'branch':
                 self.owner, self.project = title_soup.contents[index + 3].text.split('/')
@@ -126,36 +119,40 @@ class CreateObject(ActivityObject):
 
 
 class PushActivity(Activity):
-
     def __init__(self, activity):
-        Activity.__init__(self, activity.actor, PushObject(activity.object), activity.target, GITHUB_PUSH, activity.time, activity.generator, activity.icon_url, activity.service_provider, activity.links)
+        Activity.__init__(self, activity.actor, PushObject(activity.object), activity.target, GITHUB_PUSH,
+                          activity.time, activity.generator, activity.icon_url, activity.service_provider,
+                          activity.links)
 
 
 class PullRequestActivity(Activity):
-
     def __init__(self, activity):
-        Activity.__init__(self, activity.actor, PullRequestObject(activity.object), activity.target, GITHUB_PULL_REQUEST, activity.time, activity.generator, activity.icon_url, activity.service_provider, activity.links)
+        Activity.__init__(self, activity.actor, PullRequestObject(activity.object), activity.target,
+                          GITHUB_PULL_REQUEST, activity.time, activity.generator, activity.icon_url,
+                          activity.service_provider, activity.links)
 
 
 class ForkActivity(Activity):
-
     def __init__(self, activity):
-        Activity.__init__(self, activity.actor, ForkObject(activity.object), activity.target, GITHUB_FORK, activity.time, activity.generator, activity.icon_url, activity.service_provider, activity.links)
+        Activity.__init__(self, activity.actor, ForkObject(activity.object), activity.target, GITHUB_FORK,
+                          activity.time, activity.generator, activity.icon_url, activity.service_provider,
+                          activity.links)
 
 
 class CreateActivity(Activity):
-
     def __init__(self, activity):
-        Activity.__init__(self, activity.actor, CreateObject(activity.object), activity.target, GITHUB_CREATE, activity.time, activity.generator, activity.icon_url, activity.service_provider, activity.links)
-
+        Activity.__init__(self, activity.actor, CreateObject(activity.object), activity.target, GITHUB_CREATE,
+                          activity.time, activity.generator, activity.icon_url, activity.service_provider,
+                          activity.links)
 
 
 def github_id_to_wok_slug(base_object):
-    slug = base_object.id.replace('tag:', '').replace('.', '-').replace(',', '-').replace('/', '-').replace(':', '-').lower()
+    slug = base_object.id.replace('tag:', '').replace('.', '-').replace(',', '-').replace('/', '-').replace(':',
+                                                                                                            '-').lower()
     return slug
 
-class PushPost(TimelineUpdate):
 
+class PushPost(TimelineUpdate):
     def __init__(self, base_object, time):
         assert isinstance(base_object, PushObject)
 
@@ -174,14 +171,14 @@ class PushPost(TimelineUpdate):
 
 
 class PullRequestPost(TimelineUpdate):
-
     def __init__(self, base_object, time):
         assert isinstance(base_object, PullRequestObject)
 
         slug = github_id_to_wok_slug(base_object)
         title = 'requested to pull %s fork' % base_object.project
         url = base_object.url
-        content = '[requested](%s) to pull [%s](%s) fork' % (base_object.url, base_object.project, base_object.repository_url)
+        content = '[requested](%s) to pull [%s](%s) fork' % (
+            base_object.url, base_object.project, base_object.repository_url)
 
         TimelineUpdate.__init__(self, slug, title, url, time, content)
 
@@ -190,7 +187,6 @@ class PullRequestPost(TimelineUpdate):
 
 
 class ForkPost(TimelineUpdate):
-
     def __init__(self, base_object, time):
         assert isinstance(base_object, ForkObject)
 
@@ -205,7 +201,6 @@ class ForkPost(TimelineUpdate):
 
 
 class CreatePost(TimelineUpdate):
-
     def __init__(self, base_object, time):
         assert isinstance(base_object, CreateObject)
 
@@ -220,11 +215,11 @@ class CreatePost(TimelineUpdate):
         self.actions.append(('show project', base_object.repository_url))
 
 
-def add_github_activities_to_timeline(options, content_dir = './content/timeline/'):
+def add_github_activities_to_timeline(options, content_dir='./content/timeline/'):
     config = Configuration('github.config')
     assert config['user'], 'user must be set in github.config'
     url = '%s%s.atom' % ('https://github.com/', config['user'])
-    #req = urllib2.Request(url, {}, {'Content-Type': 'application/atom+xml'})
+    # req = urllib2.Request(url, {}, {'Content-Type': 'application/atom+xml'})
 
     logging.info('read %s', url)
     response = urllib2.urlopen(url)
@@ -273,8 +268,9 @@ def add_github_activities_to_timeline(options, content_dir = './content/timeline
         except IOError as ex:
             print ex
 
+
 if __name__ == '__main__':
-    logging.basicConfig(format = '%(asctime)s %(levelname)s %(name)s:%(message)s', level = logging.DEBUG)
-    #import os
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s:%(message)s', level=logging.DEBUG)
+    # import os
     #os.chdir('..')
     add_github_activities_to_timeline({}, '/tmp/')

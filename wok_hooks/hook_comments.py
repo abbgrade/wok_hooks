@@ -11,6 +11,7 @@ DEFAULTS = {'server': '',
             'user': '',
             'password': ''}
 
+
 class Configuration(_Configuration):
 
     def __init__(self, path, **kwargs):
@@ -22,6 +23,7 @@ class Configuration(_Configuration):
                 self.save()
 
 email_pattern = re.compile(r'[\w\-]?[<][\w\-\.]+@[\w\-][\w\-\.]+[a-zA-Z]{1,4}?[>]')
+
 
 def add_mails_to_comments(options, content_dir=None):
 

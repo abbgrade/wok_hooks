@@ -1,4 +1,3 @@
-
 import logging
 
 import os
@@ -10,8 +9,8 @@ DEFAULT_BACKEND_TYPE = 'ftp'
 
 from wok_hooks.misc import Configuration as _Configuration
 
-class Configuration(_Configuration):
 
+class Configuration(_Configuration):
     def __init__(self, path, **kwargs):
         _Configuration.__init__(self, path, **kwargs)
 
@@ -21,19 +20,23 @@ class Configuration(_Configuration):
 
 
 class Observable:
-
-    def __init__(self, observer = []):
+    def __init__(self, observer=None):
         self._observer = []
-        for item in observer:
-            self.register_observer(item)
+        if observer:
+            for item in observer:
+                self.register_observer(item)
 
     def register_observer(self, observer):
         self._observer.append(observer)
 
-class Stateful(Observable):
 
-    def __init__(self, observer = []):
+class Stateful(Observable):
+    def __init__(self, observer=None):
+        if not hasattr(self, '_state'):
+            self._state = None
+
         Observable.__init__(self, observer)
+
         if self._state is None:
             raise NotImplementedError()
 
@@ -52,14 +55,15 @@ class Stateful(Observable):
         for observer in self._observer:
             observer.on_state_update(self)
 
-class FileBackend(Stateful):
 
+class FileBackend(Stateful):
     STATE_DISCONNECTED = 'disconnected'
     STATE_CONNECTED = 'connected'
 
-    class ConnectionException(Exception): pass
+    class ConnectionException(Exception):
+        pass
 
-    def __init__(self, config, observer = []):
+    def __init__(self, config, observer=None):
         self.config = config
         self._state = self.STATE_DISCONNECTED
         Stateful.__init__(self, observer)
@@ -87,7 +91,6 @@ class FileBackend(Stateful):
 
 
 class FTP(FileBackend):
-
     def __init__(self, config):
         FileBackend.__init__(self, config)
         self._init_config()
@@ -163,10 +166,9 @@ class FTP(FileBackend):
 
     def get_root_path(self):
         raise NotImplementedError()
-        return self.config['ftp.root_path']
+
 
 class SFTP(FileBackend):
-
     def __init__(self, config):
         FileBackend.__init__(self, config)
         self._init_config()
@@ -209,14 +211,14 @@ class SFTP(FileBackend):
     def _authenticate(self):
         self._transport = SFTPTransport((self.config['sftp_host'],
                                          self.config['sftp_port']))
-        self._transport.connect(username = self.config['sftp_user'],
-                                password = self.config['sftp_password'])
+        self._transport.connect(username=self.config['sftp_user'],
+                                password=self.config['sftp_password'])
         self.session = SFTPClient.from_transport(self._transport)
         logging.info('SFTP Authorization succeed')
 
     def disconnect(self):
         self.session.close()
-        self.transport.close()
+        self._transport.close()
 
     def file_create_folder(self, path):
         if self.state == self.STATE_CONNECTED:
@@ -248,7 +250,7 @@ class SFTP(FileBackend):
             dirpath = '/'.join(path.split('/')[:-1])
             self.file_create_folder(dirpath)
             try:
-                self.session.putfo(fl = file_handle, remotepath = '/' + path)
+                self.session.putfo(fl=file_handle, remotepath='/' + path)
                 logging.info('Create remote file %s' % '/' + path)
             except Exception as ex:
                 logging.error(ex)
@@ -258,11 +260,11 @@ class SFTP(FileBackend):
             raise NotImplementedError()
 
 
-def distribute_output(options, output_path = None):
-
+def distribute_output(options, output_path=None):
     if not output_path:
         from wok.engine import Engine  # @UnresolvedImport
         import yaml
+
         options = Engine.default_options.copy()
 
         if os.path.isfile('config'):
@@ -273,14 +275,15 @@ def distribute_output(options, output_path = None):
                 options.update(yaml_config)
 
         output_path = options['output_dir']
+
+    remote_server = None
     try:
         config = Configuration('distribute.config')
-        remote_server = None
         if config['type'] == 'ftp':
             remote_server = FTP(config)
         if config['type'] == 'sftp':
             remote_server = SFTP(config)
-        for root, dirnames, filenames in os.walk(output_path, topdown = True):
+        for root, dirnames, filenames in os.walk(output_path, topdown=True):
             for filename in filenames:
                 path = os.path.sep.join([root, filename])
                 file_handle = open(path, 'rb')
@@ -290,7 +293,7 @@ def distribute_output(options, output_path = None):
                                            file_handle)
                 except Exception as ex:
                     file_handle.close()
-                    logging.error('on put_file: ' + ex)
+                    logging.error(ex)
                     raise ex
     except Exception as ex:
         logging.error(ex)
