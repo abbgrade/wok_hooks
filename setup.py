@@ -1,5 +1,8 @@
 #!/usr/bin/env python2
 
+import ez_setup
+ez_setup.use_setuptools()
+
 from setuptools import setup
 from wok_hooks import version
 import sys
@@ -13,6 +16,7 @@ setup(
     version=version,
     author='Steffen Kampmann',
     author_email='steffen.kampmann@gmail.com',
+    license='MIT',
     url='https://github.com/abbgrade/wok_hooks',
     description='Plugins for wok',
     long_description=
