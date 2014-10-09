@@ -41,22 +41,21 @@ So an simple mailto-link and an for-loop for the comments in the page HTML will 
 
 #### Example Template
 
-    {% block comments %}
-    <hr />
     <div>
-        <h2>Comments</h2>
-    {% for comment in page.subpages %}
-    	<div>
-    		{{ comment.datetime.strftime('%c') }} - {{comment.author}}
-    		<blockquote>
-    			{{ comment.content }}
-    		</blockquote>
-    	</div>
-    {% endfor %}
-    	<a href="mailto:comment@example.tld?subject={{ page.category[0]|safe }}%2F{{ page.slug|safe }}">Add Comment</a>
-    	Please do not edit the subject! The email address will not published!
+        {% for comment in page.subpages %}
+            <div>
+            {{comment.author}}
+            {{ comment.datetime.strftime('%c') }}
+            {{ comment.content }}
+            </div>
+        {% endfor %}
+
+        <div>
+            <a class="btn btn-primary" href="mailto:YOUR_CONTACT_EMAIL@EXAMPLE.TLD?subject={{ page.category[0]|safe }}%2F{{ page.slug|safe }}">
+                Add Comment
+            </a>
+        </div>
     </div>
-    {% endblock %}
     
 Don't forget to replace *comment@example.tld* in the comment link.
 
@@ -69,6 +68,26 @@ Remove temp files before generating the website.
 ## Timeline
 
 Generation of (small) (activity based) posts.
+
+### Example Template
+
+    {% for events in site.slugs['timeline'].subpages|sort(attribute='datetime',reverse=True)|batch(10) %}
+        {% if loop.first %}
+            {% for event in events %}
+                <div timeline_update">
+                    <div class="timeline_actions_json" style="display:none">
+                        {{ event.actions }}
+                    </div>
+                    <div>
+                        {{ event.datetime.strftime('%x') }}
+                    </div>
+                    <p>
+                        {{ event.content }}
+                    </p>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
 
 ### add_diaspora_posts_to_timeline
 
@@ -121,3 +140,59 @@ Import of contact data from vcard files.
 ### add_vcard_to_contact
 
 Read vcard files adds the contact data as metadata in generated markdown files.
+
+### Example Template
+    
+    {% set person = page %}
+    
+    <dl typeof="schema:Person">
+        <span property="schema:name" content="{{ person.name }}"></span>
+        <span property="schema:url" content="{{ person.url }}"></span>
+    
+        {% if person.email %}
+    
+            <dt>
+                EMail
+            </dt>
+            <dd>
+                <a href="mailto:{{ person.email }}" property="schema:email">
+                    {{ person.email }}
+                </a>
+    
+            </dd>
+    
+        {% endif %}
+    
+        {% if person.gpg %}
+    
+            <dt>
+                PGP
+            </dt>
+            <dd>
+                <a href="{{ person.gpg[1] }}">
+                   Public Key
+                </a>
+                - Fingerprint:
+                <small>
+                    {{ person.gpg[0] }}
+                </small>
+            </dd>
+    
+        {% endif %}
+    
+        {% if person.links %}
+            {% for link_title, link_uri in person.links %}
+    
+            <dt>
+                {{ link_title }}
+            </dt>
+            <dd>
+                <a href="{{ link_uri }}" rel="me" property="schema:sameAs">
+                    {{ link_uri }}
+                </a>
+            </dd>
+    
+            {% endfor %}
+        {% endif %}
+    
+    </dl>
