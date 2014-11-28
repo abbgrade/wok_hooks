@@ -39,6 +39,7 @@ setup(
         'beautifulsoup4',
         'vobject',
         'gnupg',
+        'lastfm'
     ],
     packages=['wok_hooks'],
     scripts=[],
